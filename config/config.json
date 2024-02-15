@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "sp-fx-list-view-command-extension-command-set": {
+      "components": [
+        {
+          "entrypoint": "./lib/extensions/spFxListViewCommandExtension/SpFxListViewCommandExtensionCommandSet.js",
+          "manifest": "./src/extensions/spFxListViewCommandExtension/SpFxListViewCommandExtensionCommandSet.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "SpFxListViewCommandExtensionCommandSetStrings": "lib/extensions/spFxListViewCommandExtension/loc/{locale}.js"
+  }
+}

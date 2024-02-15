@@ -1,0 +1,31 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/spfx-serve.schema.json",
+  "port": 4321,
+  "https": true,
+  "serveConfigurations": {
+    "default": {
+      "pageUrl": "https://findmoreconsult.sharepoint.com/sites/silviobernardo/Lists/TestList/AllItems.aspx",
+      "customActions": {
+        "5fdf16b9-80f5-4ae1-a951-66cf612e2483": {
+          "location": "ClientSideExtension.ListViewCommandSet.CommandBar",
+          "properties": {
+            "sampleTextOne": "One item is selected in the list",
+            "sampleTextTwo": "This command is always visible."
+          }
+        }
+      }
+    },
+    "spFxListViewCommandExtension": {
+      "pageUrl": "https://findmoreconsult.sharepoint.com/sites/silviobernardo/Lists/TestList/AllItems.aspx",
+      "customActions": {
+        "5fdf16b9-80f5-4ae1-a951-66cf612e2483": {
+          "location": "ClientSideExtension.ListViewCommandSet.CommandBar",
+          "properties": {
+            "sampleTextOne": "One item is selected in the list",
+            "sampleTextTwo": "This command is always visible."
+          }
+        }
+      }
+    }
+  }
+}
