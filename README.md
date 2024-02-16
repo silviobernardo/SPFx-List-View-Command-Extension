@@ -1,6 +1,6 @@
 ## Sample goal
 
-This sample will add and manage custom Commands into a SharePoint List
+This sample will add and manage custom Commands into a SharePoint List and allow you to archive some records (one by one).
 
 
 ## Used SharePoint Framework Version
@@ -17,9 +17,14 @@ This sample will add and manage custom Commands into a SharePoint List
 
 ## HOW TO RUN
 
-1. Open repository folder on Visual Studio Code
-2. Go to "config/serve.json" file and update "pageUrl" value to some SharePoint List URL
-3. Open a terminal
-4. Run "npm install"
-5. Run "gulp trust-dev-cert"
-6. Run "gulp serve" command.
+1. Create two lists on SharePoint with two columns: Title (text) and Age (number)
+2. Add some data on first list
+3. Open repository folder on Visual Studio Code
+4. Go to "config/serve.json" file and update ...
+    2.1. "pageUrl" value to the first SharePoint List URL (the one that you have added some data)
+    2.1. "properties -> archiveList" with the title of the second list that you have just created and it's already empty
+5. Open a terminal
+6. Run "npm install"
+7. Run "gulp trust-dev-cert"
+8. Run "gulp serve" command.
+9. Test "Command One" button and "Archive" button (it will be available once you have selected a single row)
