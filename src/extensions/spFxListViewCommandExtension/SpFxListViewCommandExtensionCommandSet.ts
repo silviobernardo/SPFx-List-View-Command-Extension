@@ -15,7 +15,6 @@ import "@pnp/sp/items";
 import "@pnp/sp/items/get-all";
 import { IItemAddResult } from '@pnp/sp/items';
 
-
 /**
  * If your command set uses the ClientSideComponentProperties JSON input,
  * it will be deserialized into the BaseExtension.properties object.
@@ -29,46 +28,46 @@ export interface ISpFxListViewCommandExtensionCommandSetProperties {
 const LOG_SOURCE: string = 'SpFxListViewCommandExtensionCommandSet';
 
 export default class SpFxListViewCommandExtensionCommandSet extends BaseListViewCommandSet<ISpFxListViewCommandExtensionCommandSetProperties> {
-
+  private _sourceList: string = "";
+  private _targetList: string = "";
 
   private _moveRows = async (selecteRows: readonly RowAccessor[]): Promise<void> => {
     if (selecteRows.length === 0) return;
 
-    const sourceList: string = this.context.listView.list?.title || "";
-    const targetList: string = this.properties.archiveList || "";
-
     // Connect to SharePoint
     const sp: SPFI = spfi().using(SPFx(this.context));
+    const sourcelist = await sp.web.lists.getByTitle(this._sourceList);
+    const targetList = await sp.web.lists.getByTitle(this._targetList);
+
     selecteRows.forEach(async (row) => {
       const itemId = parseInt(row.getValueByName("ID"));
 
       try {
         // Get item to move
-        //const item = await sp.web.lists.getByTitle(sourceList).items.getById(itemId)(); // use type "any" rather than "IItem"
-        const item = await sp.web.lists.getByTitle(sourceList).items.getById(itemId).select("Title, Age")();
+        //const item = await list.items.getById(itemId)(); // use type "any" rather than "IItem"
+        const item = await sourcelist.items.getById(itemId).select("Title, Age")();
         const { Title, Age } = item;
 
         // Get copy item to target list
-        const addItemResult: IItemAddResult = await sp.web.lists.getByTitle(targetList).items.add({ Title, Age });
+        const addItemResult: IItemAddResult = await targetList.items.add({ Title, Age });
 
-        //console.log(addItemResult.data.Id)
         if (addItemResult.data.Id) {
+          // Move item to recycle
+          await sourcelist.items.getById(itemId).recycle();
 
           // Delete item from source list
-          await sp.web.lists.getByTitle(sourceList).items.getById(itemId).delete();
-
-          // Refresh source list data
-          await sp.web.lists.getByTitle(sourceList).items.getAll();
+          // await sourcelist.items.getById(itemId)..delete()
         }
 
       } catch (error: any) {
         // Handle any errors that occurred during the fetch
-        await Dialog.alert(`An error occurred moving '${row.getValueByName("Title")}' from '${sourceList}' to '${targetList}'`);
-        console.error(`An error occurred moving '${row.getValueByName("Title")}' (ID ${itemId}) from '${sourceList}' to '${targetList}': ${error}`);
+        await Dialog.alert(`An error occurred moving '${row.getValueByName("Title")}' from '${this._sourceList}' to '${this._targetList}'`);
+        console.error(`An error occurred moving '${row.getValueByName("Title")}' (ID ${itemId}) from '${this._sourceList}' to '${this._targetList}': ${error}`);
       }
     });
 
     await Dialog.alert("The selected items have been moved successfuly.");
+    window.location.reload()
   }
 
   public onInit(): Promise<void> {
@@ -79,6 +78,9 @@ export default class SpFxListViewCommandExtensionCommandSet extends BaseListView
     compareOneCommand.visible = false;
 
     this.context.listView.listViewStateChangedEvent.add(this, this._onListViewStateChanged);
+
+    this._sourceList = this.context.listView.list?.title || "";
+    this._targetList = this.properties.archiveList || "";
 
     return Promise.resolve();
   }
