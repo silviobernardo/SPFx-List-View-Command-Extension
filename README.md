@@ -1,6 +1,6 @@
 ## Sample goal
 
-This sample will add and manage custom Commands into a SharePoint List and allow you to archive some records (one by one).
+This sample will add and manage custom Commands into a SharePoint List and allow you to archive items.
 
 
 ## Used SharePoint Framework Version
