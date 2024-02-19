@@ -1,9 +1,9 @@
-declare interface ISpFxListViewCommandExtensionCommandSetStrings {
+declare interface ISpfxListViewCommandExtensionCommandSetStrings {
   Command1: string;
   Command2: string;
 }
 
-declare module 'SpFxListViewCommandExtensionCommandSetStrings' {
-  const strings: ISpFxListViewCommandExtensionCommandSetStrings;
+declare module 'SpfxListViewCommandExtensionCommandSetStrings' {
+  const strings: ISpfxListViewCommandExtensionCommandSetStrings;
   export = strings;
 }

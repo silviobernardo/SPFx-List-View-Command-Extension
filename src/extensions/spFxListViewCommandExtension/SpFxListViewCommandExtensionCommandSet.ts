@@ -2,6 +2,7 @@
 import { Log } from '@microsoft/sp-core-library';
 import {
   BaseListViewCommandSet,
+  RowAccessor,
   type Command,
   type IListViewCommandSetExecuteEventParameters,
   type ListViewStateChangedEventArgs
@@ -30,37 +31,44 @@ const LOG_SOURCE: string = 'SpFxListViewCommandExtensionCommandSet';
 export default class SpFxListViewCommandExtensionCommandSet extends BaseListViewCommandSet<ISpFxListViewCommandExtensionCommandSetProperties> {
 
 
-  private _moveItem = async (itemId: number): Promise<void> => {
+  private _moveRows = async (selecteRows: readonly RowAccessor[]): Promise<void> => {
+    if (selecteRows.length === 0) return;
+
     const sourceList: string = this.context.listView.list?.title || "";
     const targetList: string = this.properties.archiveList || "";
 
     // Connect to SharePoint
     const sp: SPFI = spfi().using(SPFx(this.context));
+    selecteRows.forEach(async (row) => {
+      const itemId = parseInt(row.getValueByName("ID"));
 
-    try {
-      // Get item to move
-      //const item = await sp.web.lists.getByTitle(sourceList).items.getById(itemId)(); // use type "any" rather than "IItem"
-      const item = await sp.web.lists.getByTitle(sourceList).items.getById(itemId).select("Title, Age")();
-      const { Title, Age } = item;
+      try {
+        // Get item to move
+        //const item = await sp.web.lists.getByTitle(sourceList).items.getById(itemId)(); // use type "any" rather than "IItem"
+        const item = await sp.web.lists.getByTitle(sourceList).items.getById(itemId).select("Title, Age")();
+        const { Title, Age } = item;
 
-      // Get copy item to target list
-      const addItemResult: IItemAddResult = await sp.web.lists.getByTitle(targetList).items.add({ Title, Age });
+        // Get copy item to target list
+        const addItemResult: IItemAddResult = await sp.web.lists.getByTitle(targetList).items.add({ Title, Age });
 
-      //console.log(addItemResult.data.Id)
-      if (addItemResult.data.Id) {
+        //console.log(addItemResult.data.Id)
+        if (addItemResult.data.Id) {
 
-        // Delete item from source list
-        await sp.web.lists.getByTitle(sourceList).items.getById(itemId).delete();
+          // Delete item from source list
+          await sp.web.lists.getByTitle(sourceList).items.getById(itemId).delete();
 
-        // Refresh source list data
-        await sp.web.lists.getByTitle(sourceList).items.getAll();
-        await Dialog.alert(`Item with title '${Title}' has been archived successfully.`);
+          // Refresh source list data
+          await sp.web.lists.getByTitle(sourceList).items.getAll();
+        }
+
+      } catch (error: any) {
+        // Handle any errors that occurred during the fetch
+        await Dialog.alert(`An error occurred moving '${row.getValueByName("Title")}' from '${sourceList}' to '${targetList}'`);
+        console.error(`An error occurred moving '${row.getValueByName("Title")}' (ID ${itemId}) from '${sourceList}' to '${targetList}': ${error}`);
       }
+    });
 
-    } catch (error: any) {
-      // Handle any errors that occurred during the fetch
-      console.error(`An error occured moving item ${itemId} from '${sourceList}' to '${targetList}': ${error}`);
-    }
+    await Dialog.alert("The selected items have been moved successfuly.");
   }
 
   public onInit(): Promise<void> {
@@ -78,8 +86,8 @@ export default class SpFxListViewCommandExtensionCommandSet extends BaseListView
   public async onExecute(event: IListViewCommandSetExecuteEventParameters): Promise<void> {
     switch (event.itemId) {
       case 'COMMAND_1':
-        if (this.context.listView.selectedRows?.length === 1) {
-          await this._moveItem(parseInt(this.context.listView.selectedRows[0].getValueByName("ID")));
+        if (this.context.listView.selectedRows && this.context.listView.selectedRows.length > 0) {
+          await this._moveRows(this.context.listView.selectedRows);
         }
 
         break;
@@ -97,11 +105,10 @@ export default class SpFxListViewCommandExtensionCommandSet extends BaseListView
   private _onListViewStateChanged = (args: ListViewStateChangedEventArgs): void => {
     Log.info(LOG_SOURCE, 'List view state changed');
 
-
     const compareOneCommand: Command = this.tryGetCommand('COMMAND_1');
     if (compareOneCommand) {
       // This command should be hidden unless exactly one row is selected.
-      compareOneCommand.visible = this.context.listView.selectedRows?.length === 1;
+      compareOneCommand.visible = this.context.listView.selectedRows && this.context.listView.selectedRows.length > 0 || false;
     }
 
     // You should call this.raiseOnChage() to update the command bar

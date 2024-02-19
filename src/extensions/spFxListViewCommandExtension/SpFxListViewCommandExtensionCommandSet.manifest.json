@@ -17,7 +17,7 @@
 
   "items": {
     "COMMAND_1": {
-      "title": { "default": "Archive item" },
+      "title": { "default": "Archive items" },
       "iconImageUrl": "icons/request.png",
       "type": "command"
     },
