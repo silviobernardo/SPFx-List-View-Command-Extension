@@ -36,8 +36,8 @@ export default class SpFxListViewCommandExtensionCommandSet extends BaseListView
 
     // Connect to SharePoint
     const sp: SPFI = spfi().using(SPFx(this.context));
-    const sourcelist = await sp.web.lists.getByTitle(this._sourceList);
-    const targetList = await sp.web.lists.getByTitle(this._targetList);
+    const sourcelist = sp.web.lists.getByTitle(this._sourceList);
+    const targetList = sp.web.lists.getByTitle(this._targetList);
 
     selecteRows.forEach(async (row) => {
       const itemId = parseInt(row.getValueByName("ID"));
@@ -56,7 +56,7 @@ export default class SpFxListViewCommandExtensionCommandSet extends BaseListView
           await sourcelist.items.getById(itemId).recycle();
 
           // Delete item from source list
-          // await sourcelist.items.getById(itemId)..delete()
+          // await sourcelist.items.getById(itemId).delete()
         }
 
       } catch (error: any) {
@@ -67,7 +67,6 @@ export default class SpFxListViewCommandExtensionCommandSet extends BaseListView
     });
 
     await Dialog.alert("The selected items have been moved successfuly.");
-    window.location.reload()
   }
 
   public onInit(): Promise<void> {
